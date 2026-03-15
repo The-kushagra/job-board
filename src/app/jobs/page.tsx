@@ -26,12 +26,11 @@ export default async function PublicJobsPage({
   const whereClause = [eq(JobListingTable.status, "published")]
 
   if (search) {
-    whereClause.push(
-      or(
-        ilike(JobListingTable.title, `%${search}%`),
-        ilike(OrganizationTable.name, `%${search}%`)
-      )!
+    const searchCondition = or(
+      ilike(JobListingTable.title, `%${search}%`),
+      ilike(OrganizationTable.name, `%${search}%`)
     )
+    if (searchCondition) whereClause.push(searchCondition)
   }
 
   if (type && type !== "all") {
