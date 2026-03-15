@@ -1,9 +1,10 @@
 import { db } from "@/drizzle/db"
-import { OrganizationTable } from "@/drizzle/schema"
-import { eq } from "drizzle-orm"
+import { OrganizationTable, OrganizationUserSettingsTable } from "@/drizzle/schema"
+import { eq, and } from "drizzle-orm"
 import { notFound } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DeleteOrganizationButton } from "@/components/organizations/DeleteOrganizationButton"
+import { auth } from "@clerk/nextjs/server"
 
 export default async function OrganizationSettingsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -15,6 +16,16 @@ export default async function OrganizationSettingsPage({ params }: { params: Pro
   if (!organization) {
     notFound()
   }
+
+  const { userId } = await auth()
+  const userSettings = await db.query.OrganizationUserSettingsTable.findFirst({
+    where: and(
+      eq(OrganizationUserSettingsTable.organizationId, id),
+      eq(OrganizationUserSettingsTable.userId, userId || "")
+    )
+  })
+
+  const canDelete = userSettings?.role === "admin" || userSettings?.role === "owner"
 
   return (
     <div className="container mx-auto py-10 space-y-10 px-6">
@@ -41,21 +52,23 @@ export default async function OrganizationSettingsPage({ params }: { params: Pro
           </CardContent>
         </Card>
 
-        <Card className="border-destructive/20 bg-destructive/5 shadow-xl overflow-hidden">
-          <CardHeader className="bg-destructive/10 border-b border-destructive/20">
-            <CardTitle className="text-destructive font-black">Danger Zone</CardTitle>
-            <CardDescription className="text-destructive/70 font-medium">Irreversible actions for your organization.</CardDescription>
-          </CardHeader>
-          <CardContent className="py-6">
-             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div className="space-y-1">
-                   <p className="text-white font-bold">Delete Organization</p>
-                   <p className="text-slate-500 text-sm">Once deleted, all jobs, applications, and data will be permanently removed.</p>
-                </div>
-                <DeleteOrganizationButton organizationId={id} />
-             </div>
-          </CardContent>
-        </Card>
+        {canDelete && (
+          <Card className="border-destructive/20 bg-destructive/5 shadow-xl overflow-hidden">
+            <CardHeader className="bg-destructive/10 border-b border-destructive/20">
+              <CardTitle className="text-destructive font-black">Danger Zone</CardTitle>
+              <CardDescription className="text-destructive/70 font-medium">Irreversible actions for your organization.</CardDescription>
+            </CardHeader>
+            <CardContent className="py-6">
+               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                  <div className="space-y-1">
+                     <p className="text-white font-bold">Delete Organization</p>
+                     <p className="text-slate-500 text-sm">Once deleted, all jobs, applications, and data will be permanently removed.</p>
+                  </div>
+                  <DeleteOrganizationButton organizationId={id} />
+               </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

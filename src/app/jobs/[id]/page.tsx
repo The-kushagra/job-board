@@ -59,13 +59,13 @@ export default async function JobDetailsPage({
               </Link>
             </div>
             <div className="flex flex-wrap gap-2 pt-2">
-               <Badge variant="secondary" className="gap-1">
+               <Badge variant="secondary" className="gap-1 bg-slate-800 text-slate-200 border-white/10">
                  <MapPin className="size-3" /> {job.locationRequirement}
                </Badge>
-               <Badge variant="secondary" className="gap-1">
+               <Badge variant="secondary" className="gap-1 bg-slate-800 text-slate-200 border-white/10">
                  <Clock className="size-3" /> {job.type}
                </Badge>
-               <Badge variant="outline" className="gap-1 capitalize">
+               <Badge variant="outline" className="gap-1 capitalize border-white/20 text-slate-300">
                  {job.experienceLevel}
                </Badge>
             </div>
@@ -78,50 +78,56 @@ export default async function JobDetailsPage({
         <div className="space-y-8">
           <section className="space-y-4">
             <h2 className="text-2xl font-bold border-b pb-2">Description</h2>
-            <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap text-zinc-600 dark:text-zinc-400">
+            <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap text-slate-200 leading-relaxed font-medium">
               {job.description}
             </div>
           </section>
         </div>
 
         <aside className="space-y-6">
-          <div className="rounded-xl border p-6 space-y-6 bg-zinc-50/50 dark:bg-zinc-950/50">
-            <h3 className="font-bold">Job Overview</h3>
+          <div className="rounded-xl border border-[#334155] p-6 space-y-6 bg-[#1E293B] shadow-2xl">
+            <h3 className="font-bold text-white uppercase tracking-widest text-xs opacity-70">Job Overview</h3>
             <div className="space-y-4">
               <div className="flex gap-3">
-                <DollarSign className="size-5 text-primary shrink-0" />
+                <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <DollarSign className="size-4 text-primary" />
+                </div>
                 <div>
-                   <p className="text-sm font-medium">Salary</p>
-                   <p className="text-sm text-muted-foreground">
+                   <p className="text-xs font-black text-slate-500 uppercase tracking-tighter">Salary</p>
+                   <p className="text-sm text-white font-bold">
                      {job.wage ? `${job.wage.toLocaleString()} / ${job.wageInterval}` : "Not specified"}
                    </p>
                 </div>
               </div>
               <div className="flex gap-3">
-                <Calendar className="size-5 text-primary shrink-0" />
+                <div className="size-8 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0">
+                  <Calendar className="size-4 text-teal-400" />
+                </div>
                 <div>
-                   <p className="text-sm font-medium">Posted</p>
-                   <p className="text-sm text-muted-foreground">
+                   <p className="text-xs font-black text-slate-500 uppercase tracking-tighter">Posted</p>
+                   <p className="text-sm text-white font-bold">
                       {job.postedAt ? formatDistanceToNow(new Date(job.postedAt), { addSuffix: true }) : "N/A"}
                    </p>
                 </div>
               </div>
               <div className="flex gap-3">
-                <MapPin className="size-5 text-primary shrink-0" />
+                <div className="size-8 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
+                  <MapPin className="size-4 text-indigo-400" />
+                </div>
                 <div>
-                   <p className="text-sm font-medium">Location</p>
-                   <p className="text-sm text-muted-foreground capitalize">{job.locationRequirement}</p>
+                   <p className="text-xs font-black text-slate-500 uppercase tracking-tighter">Location</p>
+                   <p className="text-sm text-white font-bold capitalize">{job.locationRequirement}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border p-6 space-y-4">
-             <h3 className="font-bold">About {job.organization.name}</h3>
-             <p className="text-sm text-muted-foreground line-clamp-4">
+          <div className="rounded-xl border border-[#334155] p-6 space-y-4 bg-[#1E293B] shadow-2xl">
+             <h3 className="font-bold text-white uppercase tracking-widest text-xs opacity-70">About {job.organization.name}</h3>
+             <p className="text-sm text-slate-300 leading-relaxed">
                 We're a team of innovators building the future of technology. Join us to make a real impact.
              </p>
-             <Button variant="outline" className="w-full" asChild>
+             <Button variant="outline" className="w-full font-bold border-white/10 hover:bg-white/5" asChild>
                 <Link href={`/organizations/${job.organizationId}`}>View Profile</Link>
              </Button>
           </div>

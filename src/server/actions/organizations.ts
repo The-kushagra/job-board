@@ -104,9 +104,9 @@ export async function deleteOrganization(organizationId: string) {
     )
   })
 
-  if (!currentUserSettings || currentUserSettings.role !== "admin") {
+  if (!currentUserSettings || !["admin", "owner"].includes(currentUserSettings.role)) {
     return {
-      error: "Only organization admins can delete the organization",
+      error: "Only organization admins or owners can delete the organization",
     }
   }
 

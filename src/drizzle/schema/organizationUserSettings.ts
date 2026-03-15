@@ -3,7 +3,7 @@ import { createdAt, id, updatedAt } from "../schemaHelpers"
 import { OrganizationTable } from "./organization"
 import { UserTable } from "./user"
 
-export const organizationUserRoles = ["admin", "member"] as const
+export const organizationUserRoles = ["admin", "member", "owner"] as const
 export type OrganizationUserRole = (typeof organizationUserRoles)[number]
 export const organizationUserRoleEnum = pgEnum(
     "organization_user_role",
