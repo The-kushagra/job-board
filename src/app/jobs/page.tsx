@@ -31,7 +31,7 @@ export default async function PublicJobsPage({
       ilike(OrganizationTable.name, `%${search}%`)
     )
     if (searchCondition) whereClause.push(searchCondition)
-  }
+  } 
 
   if (type && type !== "all") {
     whereClause.push(eq(JobListingTable.type, type as any))
