@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { SignInButton, SignOutButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { 
@@ -12,6 +11,7 @@ import {
   Instagram, 
   Mail 
 } from "lucide-react";
+import { LandingNavbar } from "@/components/landing-navbar";
 
 export default async function LandingPage() {
   const { userId } = await auth();
@@ -21,41 +21,7 @@ export default async function LandingPage() {
       {/* Background patterns */}
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.1),transparent_50%)]" />
       
-      <header className="fixed top-0 w-full z-50 border-b border-white/5 bg-background/50 backdrop-blur-xl">
-        <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-          <Link className="flex items-center gap-2 group" href="/">
-            <div className="size-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
-              <BriefcaseBusiness className="size-6" />
-            </div>
-            <span className="font-bold text-2xl tracking-tight text-white group-hover:text-purple-400 transition-colors">
-              NextHire
-            </span>
-          </Link>
-          
-          <nav className="hidden md:flex items-center gap-8">
-            <Link className="text-sm font-semibold text-slate-400 hover:text-white transition-colors" href="#features">
-              Features
-            </Link>
-            <Link className="text-sm font-semibold text-slate-400 hover:text-white transition-colors" href="#stats">
-              Stats
-            </Link>
-            {userId ? (
-              <div className="flex items-center gap-4">
-                <Button asChild variant="outline" size="sm" className="hidden sm:flex">
-                  <Link href="/dashboard">Dashboard</Link>
-                </Button>
-                <SignOutButton>
-                  <Button variant="ghost" size="sm">Sign Out</Button>
-                </SignOutButton>
-              </div>
-            ) : (
-              <SignInButton mode="modal">
-                <Button size="sm">Sign In</Button>
-              </SignInButton>
-            )}
-          </nav>
-        </div>
-      </header>
+      <LandingNavbar userId={userId} />
 
       <main className="flex-1">
         <section className="relative min-h-screen flex flex-col items-center justify-center pt-20 pb-12 overflow-hidden">
