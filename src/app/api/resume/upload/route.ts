@@ -47,40 +47,34 @@ export async function POST(req: Request) {
       )
     }
 
-    // Check if a resume already exists for the user
-    const existingResume = await db.query.UserResumeTable.findFirst({
-      where: eq(UserResumeTable.userId, userId),
-      orderBy: desc(UserResumeTable.createdAt),
+    // Log the exact schema field names being used to confirm they match
+    console.log("Database schema check - Table: user_resumes", {
+      fields: ["id", "userId", "resumeUrl", "resumeText", "createdAt", "updatedAt"]
     })
 
-    let resumeId: string
+    const fileName = String(file.name || "resume.pdf")
 
-    if (existingResume) {
-      // Update the existing resume
-      const [updated] = await db
-        .update(UserResumeTable)
-        .set({
-          resumeUrl: file.name,
+    // Use an upsert based on userId
+    const [resume] = await db
+      .insert(UserResumeTable)
+      .values({
+        id: crypto.randomUUID(),
+        userId,
+        resumeUrl: fileName,
+        resumeText,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: UserResumeTable.userId,
+        set: {
+          resumeUrl: fileName,
           resumeText,
           updatedAt: new Date(),
-        })
-        .where(eq(UserResumeTable.id, existingResume.id))
-        .returning({ id: UserResumeTable.id })
+        },
+      })
+      .returning({ id: UserResumeTable.id })
 
-      resumeId = updated.id
-    } else {
-      // Insert a new resume
-      const [inserted] = await db
-        .insert(UserResumeTable)
-        .values({
-          userId,
-          resumeUrl: file.name,
-          resumeText,
-        })
-        .returning({ id: UserResumeTable.id })
-
-      resumeId = inserted.id
-    }
+    const resumeId = resume.id
 
     // Upsert resume embedding to Pinecone (non-blocking)
     upsertResumeEmbedding(userId, resumeText).catch((err) =>

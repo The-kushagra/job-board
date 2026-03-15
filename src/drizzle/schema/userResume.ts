@@ -6,7 +6,8 @@ export const UserResumeTable = pgTable("user_resumes", {
     id,
     userId: varchar()
         .references(() => UserTable.id, { onDelete: "cascade" })
-        .notNull(),
+        .notNull()
+        .unique(),
     resumeUrl: varchar().notNull(),
     resumeText: text(),
     createdAt,
