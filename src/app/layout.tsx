@@ -17,6 +17,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "NextHire | AI-Powered Job Board",
   description: "Find your next career move with NextHire's AI-powered job matching.",
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.ico',
+  }
 };
 
 import { Toaster } from "@/components/ui/sonner"
