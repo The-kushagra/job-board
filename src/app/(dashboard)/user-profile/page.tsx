@@ -23,12 +23,14 @@ export default async function UserProfilePage() {
   }
 
   return (
-    <div className="space-y-8 py-6">
-      <div className="flex justify-center">
-        <UserProfile routing="hash" />
-      </div>
-      <div className="max-w-2xl mx-auto w-full px-4">
+    <div className="space-y-12 py-6">
+      <div className="max-w-2xl mx-auto w-full px-4 space-y-4">
+        <h2 className="text-2xl font-bold text-white tracking-tight">Your Resume</h2>
         <ResumeUpload existingResumeDate={existingResumeDate} />
+      </div>
+
+      <div className="flex justify-center border-t border-white/5 pt-12">
+        <UserProfile routing="hash" />
       </div>
     </div>
   );
