@@ -8,6 +8,7 @@ import { z } from "zod"
 import { jobListingSchema } from "../schemas/jobListings"
 import { and, eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
+import { upsertJobEmbedding } from "@/lib/vectorSync"
 
 export async function createJobListing(formData: z.infer<typeof jobListingSchema>) {
   const { userId } = await auth()
@@ -48,6 +49,12 @@ export async function createJobListing(formData: z.infer<typeof jobListingSchema
       })
       .returning()
 
+    // Upsert job embedding to Pinecone (non-blocking)
+    const jobText = `${job.title} ${job.description}`
+    upsertJobEmbedding(job.id, jobText).catch((err) =>
+      console.error("Pinecone job embedding upsert failed:", err)
+    )
+
     revalidatePath("/jobs")
     revalidatePath(`/organizations/${formData.organizationId}`)
   } catch (error) {
@@ -59,3 +66,4 @@ export async function createJobListing(formData: z.infer<typeof jobListingSchema
 
   redirect(`/organizations/${formData.organizationId}`)
 }
+

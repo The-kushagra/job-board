@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Sidebar,
   SidebarContent,
@@ -18,43 +20,36 @@ import {
   Settings,
   Sparkles,
   User,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
-import { db } from "@/drizzle/db";
-import { auth } from "@clerk/nextjs/server";
-import { OrganizationTable, OrganizationUserSettingsTable, UserTable } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
-export async function AppSidebar() {
-  const { userId } = await auth();
+type Organization = { id: string; name: string };
+
+export function AppSidebar({ role }: { role: 'recruiter' | 'candidate' }) {
+  const pathname = usePathname();
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
   
-  let organizations: { id: string, name: string }[] = []
-  
-  try {
-    if (userId) {
-      const user = await db.query.UserTable.findFirst({
-        where: eq(UserTable.id, userId),
-        with: {
-          organizationUserSettings: {
-            with: {
-              organization: true
-            }
-          }
+  useEffect(() => {
+    async function fetchOrgs() {
+      try {
+        const res = await fetch("/api/organizations/my");
+        if (res.ok) {
+          const data = await res.json();
+          setOrganizations(data);
         }
-      })
-      
-      if (user?.organizationUserSettings) {
-        organizations = user.organizationUserSettings
-          .map(ous => ous.organization)
-          .filter((org): org is { id: string; name: string; imageUrl: string; createdAt: Date; updatedAt: Date } => !!org)
+      } catch (error) {
+        console.error("SIDEBAR ORGS FETCH ERROR:", error);
       }
     }
-  } catch (error) {
-    console.error("SIDEBAR QUERY ERROR:", error)
-  }
+    fetchOrgs();
+  }, []);
 
-  const navItems = [
+  const candidateNavItems = [
     {
       title: "Dashboard",
       url: "/dashboard",
@@ -72,6 +67,26 @@ export async function AppSidebar() {
     },
   ];
 
+  const recruiterNavItems = [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Post a Job",
+      url: organizations.length > 0 ? `/organizations/${organizations[0].id}/jobs/new` : "/organizations/new",
+      icon: Plus,
+    },
+    {
+      title: "All Applicants",
+      url: "/applications",
+      icon: Users,
+    },
+  ];
+
+  const navItems = role === 'recruiter' ? recruiterNavItems : candidateNavItems;
+
   const secondaryItems = [
     {
       title: "Profile",
@@ -86,38 +101,56 @@ export async function AppSidebar() {
   ];
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-4 py-2">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900">
-            <BriefcaseBusiness className="size-4" />
+        <div className="flex items-center gap-3 px-4 py-4">
+          <div className="flex aspect-square size-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/20">
+            <BriefcaseBusiness className="size-5" />
           </div>
-          <span className="font-semibold text-lg tracking-tight group-data-[collapsible=icon]:hidden">
+          <span className="font-bold text-xl tracking-tight text-gradient-purple group-data-[collapsible=icon]:hidden">
             NextHire
           </span>
         </div>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="px-2">
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">
+            Application
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navItems.map((item) => {
+                const isActive = pathname === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      tooltip={item.title}
+                      isActive={isActive}
+                      className={cn(
+                        "relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group/item",
+                        isActive 
+                          ? "bg-primary/10 text-primary font-semibold" 
+                          : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                      )}
+                    >
+                      <Link href={item.url}>
+                        <item.icon className={cn("size-5 transition-transform group-hover/item:scale-110", isActive && "text-primary")} />
+                        <span>{item.title}</span>
+                        {isActive && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
         
-        <SidebarGroup>
-          <SidebarGroupLabel className="flex items-center justify-between">
+        <SidebarGroup className="mt-4">
+          <SidebarGroupLabel className="flex items-center justify-between text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">
             Organizations
             <Link href="/organizations/new" className="hover:text-primary transition-colors">
               <Plus className="size-3" />
@@ -125,19 +158,36 @@ export async function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {organizations.map((org) => (
-                <SidebarMenuItem key={org.id}>
-                  <SidebarMenuButton asChild tooltip={org.name}>
-                    <Link href={`/organizations/${org.id}`}>
-                      <Building2 className="size-4" />
-                      <span>{org.name}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {organizations.map((org) => {
+                const url = `/organizations/${org.id}`;
+                const isActive = pathname.startsWith(url);
+                return (
+                  <SidebarMenuItem key={org.id}>
+                    <SidebarMenuButton 
+                      asChild 
+                      tooltip={org.name}
+                      isActive={isActive}
+                      className={cn(
+                        "relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group/item",
+                        isActive 
+                          ? "bg-primary/10 text-primary font-semibold" 
+                          : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                      )}
+                    >
+                      <Link href={url}>
+                        <Building2 className={cn("size-5 text-teal-400 opacity-70 group-hover/item:opacity-100", isActive && "text-primary opacity-100")} />
+                        <span className="truncate">{org.name}</span>
+                        {isActive && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
               {organizations.length === 0 && (
                  <SidebarMenuItem>
-                    <div className="px-2 py-1 text-xs text-muted-foreground italic">
+                    <div className="px-3 py-2 text-xs text-muted-foreground/60 italic">
                       No organizations yet
                     </div>
                  </SidebarMenuItem>
@@ -147,29 +197,44 @@ export async function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="mt-auto">
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">
+            Account
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {secondaryItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {secondaryItems.map((item) => {
+                const isActive = pathname === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      tooltip={item.title}
+                      isActive={isActive}
+                      className={cn(
+                        "relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group/item",
+                        isActive 
+                          ? "bg-primary/10 text-primary font-semibold" 
+                          : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                      )}
+                    >
+                      <Link href={item.url}>
+                        <item.icon className={cn("size-5", isActive && "text-primary")} />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <div className="flex items-center gap-3 p-4 group-data-[collapsible=icon]:p-2">
+      <SidebarFooter className="border-t border-sidebar-border/50 p-4">
+        <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
            <UserButton />
-           <div className="flex flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
-             <span className="text-sm font-medium">My Account</span>
-             <span className="text-xs text-muted-foreground">Manage profile</span>
+           <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
+             <span className="text-sm font-semibold truncate">My Account</span>
+             <span className="text-[10px] text-muted-foreground hover:text-primary cursor-pointer transition-colors">Manage profile</span>
            </div>
         </div>
       </SidebarFooter>

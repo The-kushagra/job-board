@@ -69,6 +69,7 @@ DATABASE_URL=your_postgresql_url
 
 # AI Services
 GROQ_API_KEY=your_groq_api_key
+PINECONE_API_KEY=pcsk_3kBjXL_3Y2rnfcBMi5Yjx14dRXzhGjk9tcB6JSSzQGzJ9CiAGSRbCKZ5b2aBEVxxt2qHya
 
 # Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_publishable_key

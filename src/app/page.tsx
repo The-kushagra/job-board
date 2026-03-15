@@ -1,70 +1,218 @@
 import { Button } from "@/components/ui/button";
-import { SignInButton, SignOutButton, Show } from "@clerk/nextjs";
+import { SignInButton, SignOutButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
+import { 
+  Sparkles, 
+  BriefcaseBusiness, 
+  Users, 
+  Trophy, 
+  Github, 
+  Linkedin, 
+  Instagram, 
+  Mail 
+} from "lucide-react";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const { userId } = await auth();
+
   return (
-    <div className="flex flex-col min-h-screen bg-zinc-50 dark:bg-black">
-      <header className="flex h-16 items-center px-4 md:px-6 border-b bg-white/50 dark:bg-zinc-950/50 backdrop-blur-md sticky top-0 z-50">
-        <Link className="flex items-center gap-2 font-bold text-xl tracking-tighter" href="/">
-          NextHire
-        </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
-            Features
+    <div className="flex flex-col min-h-screen bg-background text-foreground selection:bg-primary/30">
+      {/* Background patterns */}
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.1),transparent_50%)]" />
+      
+      <header className="fixed top-0 w-full z-50 border-b border-white/5 bg-background/50 backdrop-blur-xl">
+        <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+          <Link className="flex items-center gap-2 group" href="/">
+            <div className="size-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
+              <BriefcaseBusiness className="size-6" />
+            </div>
+            <span className="font-bold text-2xl tracking-tight text-white group-hover:text-purple-400 transition-colors">
+              NextHire
+            </span>
           </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
-            Pricing
-          </Link>
-          <Show when="signed-in">
-            <Button asChild size="sm">
-              <Link href="/dashboard">Go to Dashboard</Link>
-            </Button>
-            <SignOutButton>
-              <Button variant="ghost" size="sm">Sign Out</Button>
-            </SignOutButton>
-          </Show>
-          <Show when="signed-out">
-            <SignInButton mode="modal">
-              <Button size="sm">Sign In</Button>
-            </SignInButton>
-          </Show>
-        </nav>
-      </header>
-      <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="flex flex-col items-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-                  Find Your Next AI Job with Intelligence
-                </h1>
-                <p className="mx-auto max-w-[700px] text-zinc-500 md:text-xl dark:text-zinc-400">
-                  The only job board powered by AI to match you with matching roles instantly.
-                </p>
+          
+          <nav className="hidden md:flex items-center gap-8">
+            <Link className="text-sm font-semibold text-slate-400 hover:text-white transition-colors" href="#features">
+              Features
+            </Link>
+            <Link className="text-sm font-semibold text-slate-400 hover:text-white transition-colors" href="#stats">
+              Stats
+            </Link>
+            {userId ? (
+              <div className="flex items-center gap-4">
+                <Button asChild variant="outline" size="sm" className="hidden sm:flex">
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+                <SignOutButton>
+                  <Button variant="ghost" size="sm">Sign Out</Button>
+                </SignOutButton>
               </div>
-              <div className="space-x-4">
-                <Button asChild size="lg" className="px-8">
-                  <Link href="/sign-up">Get Started</Link>
-                </Button>
-                <Button variant="outline" size="lg" className="px-8">
-                  Learn More
-                </Button>
+            ) : (
+              <SignInButton mode="modal">
+                <Button size="sm">Sign In</Button>
+              </SignInButton>
+            )}
+          </nav>
+        </div>
+      </header>
+
+      <main className="flex-1">
+        <section className="relative min-h-screen flex flex-col items-center justify-center pt-20 pb-12 overflow-hidden">
+          <div className="container px-6 text-center space-y-12 max-w-5xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-bold animate-in fade-in slide-in-from-top-4 duration-1000">
+              <Sparkles className="size-4" />
+              <span>Next-Gen Hiring Experience</span>
+            </div>
+            
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight text-white leading-[1.1]">
+              <span className="text-gradient-purple">AI-Powered</span> Recruitment, <br className="hidden md:block" /> Reimagined
+            </h1>
+            
+            <p className="mx-auto max-w-2xl text-slate-400 text-lg md:text-xl font-medium leading-relaxed">
+              Skip the manual screening. Our advanced AI analyzes resumes and identifies your perfect match in seconds. Professional, fast, and intelligent.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6">
+              <Button asChild size="lg" className="w-full sm:w-auto text-lg h-14 px-10">
+                <Link href="/jobs">Find Jobs Now</Link>
+              </Button>
+              <Button variant="outline" size="lg" className="w-full sm:w-auto text-lg h-14 px-10">
+                <Link href="/dashboard">Post a Job Position</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        <section id="features" className="py-24 bg-slate-900/50 relative border-y border-white/5">
+          <div className="container mx-auto px-6">
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "Resume Analysis",
+                  description: "Extract professional data from PDFs automatically using our high-precision parsing engine.",
+                  icon: Sparkles
+                },
+                {
+                  title: "Smart Matching",
+                  description: "Our vector-based matching system finds candidates who actually share your required tech stack.",
+                  icon: BriefcaseBusiness
+                },
+                {
+                  title: "Applicant Ranking",
+                  description: "AI-generated scores and feedback help you focus on the top 1% of talent immediately.",
+                  icon: Trophy
+                }
+              ].map((feature, i) => (
+                <div key={i} className="group p-8 rounded-3xl border border-white/5 bg-slate-800/30 hover:bg-slate-800/50 hover:border-primary/50 transition-all duration-300">
+                  <div className="size-14 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 mb-6 group-hover:scale-110 group-hover:bg-primary transition-all">
+                    <feature.icon className="size-7 text-primary group-hover:text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-4">{feature.title}</h3>
+                  <p className="text-slate-400 font-medium leading-relaxed">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="stats" className="py-24 relative">
+          <div className="container mx-auto px-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-12 text-center">
+              <div>
+                <div className="text-5xl md:text-6xl font-black text-white mb-2">10+</div>
+                <div className="text-slate-400 font-bold uppercase tracking-widest text-sm">Active Jobs</div>
+              </div>
+              <div>
+                <div className="text-5xl md:text-6xl font-black text-gradient-purple mb-2">98%</div>
+                <div className="text-slate-400 font-bold uppercase tracking-widest text-sm">AI Accuracy</div>
+              </div>
+              <div className="col-span-2 md:col-span-1">
+                <div className="text-5xl md:text-6xl font-black text-white mb-2">Instant</div>
+                <div className="text-slate-400 font-bold uppercase tracking-widest text-sm">Matching</div>
               </div>
             </div>
           </div>
         </section>
       </main>
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">© 2025 NextHire. All rights reserved.</p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
-            Terms of Service
-          </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
-            Privacy
-          </Link>
-        </nav>
+
+      <footer className="bg-[#0F172A] border-t border-[#334155] px-8 py-16 relative z-10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
+          {/* Brand Column */}
+          <div className="space-y-6">
+            <Link className="flex items-center gap-2 group" href="/">
+              <div className="size-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
+                <BriefcaseBusiness className="size-6" />
+              </div>
+              <span className="font-bold text-2xl tracking-tight text-white group-hover:text-purple-400 transition-colors">
+                NextHire
+              </span>
+            </Link>
+            <p className="text-[#94A3B8] font-medium leading-relaxed max-w-xs">
+              AI-Powered Recruitment, Reimagined. Built for the modern talent acquisition era.
+            </p>
+            <div className="pt-4">
+              <p className="text-[#94A3B8] text-sm font-semibold">
+                © 2025 NextHire. Built by Kushagra Gupta.
+              </p>
+            </div>
+          </div>
+
+          {/* Links Column */}
+          <div className="grid grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <h4 className="text-white font-black uppercase tracking-widest text-xs">Product</h4>
+              <ul className="space-y-4">
+                <li><Link href="#features" className="text-[#94A3B8] hover:text-white transition-colors font-medium">Features</Link></li>
+                <li><Link href="/jobs" className="text-[#94A3B8] hover:text-white transition-colors font-medium">Jobs Marketplace</Link></li>
+                <li><Link href="/dashboard" className="text-[#94A3B8] hover:text-white transition-colors font-medium">Dashboard</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-6">
+              <h4 className="text-white font-black uppercase tracking-widest text-xs">Connect</h4>
+              <ul className="space-y-4">
+                <li>
+                  <a href="mailto:kushagragupta96855@gmail.com" className="flex items-center gap-2 text-[#94A3B8] hover:text-white transition-colors font-medium">
+                    <Mail className="size-4" />
+                    <span>Email Us</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="https://github.com/The-kushagra" className="flex items-center gap-2 text-[#94A3B8] hover:text-white transition-colors font-medium">
+                    <Github className="size-4" />
+                    <span>GitHub</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Social Column */}
+          <div className="space-y-8">
+            <h4 className="text-white font-black uppercase tracking-widest text-xs">Social Presence</h4>
+            <div className="flex flex-wrap gap-4">
+              {[
+                { icon: Linkedin, url: "https://www.linkedin.com/in/kushagra-gupta-9a5bb3260" },
+                { icon: Instagram, url: "https://www.instagram.com/the_kushagraa/" },
+                { icon: Github, url: "https://github.com/The-kushagra" }
+              ].map((social, i) => (
+                <a 
+                  key={i} 
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="size-12 rounded-xl bg-[#1E293B] border border-[#334155] flex items-center justify-center text-white hover:bg-primary hover:border-primary hover:scale-110 transition-all duration-300"
+                >
+                  <social.icon className="size-5" />
+                </a>
+              ))}
+            </div>
+            <div className="pt-2">
+               <p className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Primary Contact</p>
+               <p className="text-white font-bold">kushagragupta96855@gmail.com</p>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );

@@ -8,6 +8,7 @@ export const env = createEnv({
         CLERK_WEBHOOK_SECRET: z.string().min(1),
         GEMINI_API_KEY: z.string().optional(),
         GROQ_API_KEY: z.string().optional(),
+        PINECONE_API_KEY: z.string().min(1),
         SERVER_URL: z.string().min(1).optional(),
     },
     emptyStringAsUndefined: true,

@@ -10,12 +10,18 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { headers } from "next/headers";
+import { auth } from "@clerk/nextjs/server";
+import { getUserRole } from "@/lib/getUserRole";
+import { ChatBot } from "@/components/ChatBot";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { userId } = await auth();
+  const role = userId ? await getUserRole(userId) : 'candidate';
+
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") || "";
   
@@ -24,33 +30,34 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <main className="flex-1 overflow-auto bg-zinc-50/50 dark:bg-zinc-950/50 min-h-screen">
-        <header className="flex h-16 shrink-0 items-center gap-2 sticky top-0 bg-background/80 backdrop-blur-md z-30 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b px-4">
+      <AppSidebar role={role} />
+      <main className="flex-1 overflow-auto min-h-screen">
+        <header className="flex h-16 shrink-0 items-center gap-2 sticky top-0 z-30 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 px-4">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard" className="capitalize">Dashboard</BreadcrumbLink>
+                  <BreadcrumbLink href="/dashboard" className="capitalize text-slate-400 hover:text-white">Dashboard</BreadcrumbLink>
                 </BreadcrumbItem>
-                {paths.length > 1 && <BreadcrumbSeparator />}
+                {paths.length > 1 && <BreadcrumbSeparator className="text-slate-600" />}
                 {paths.slice(1).map((path, index) => (
                   <div key={path} className="flex items-center gap-2">
                     <BreadcrumbItem>
-                      <BreadcrumbPage className="capitalize max-w-[150px] truncate">
+                      <BreadcrumbPage className="capitalize max-w-[150px] truncate text-slate-200">
                         {path.replace(/-/g, " ")}
                       </BreadcrumbPage>
                     </BreadcrumbItem>
-                    {index < paths.slice(1).length - 1 && <BreadcrumbSeparator />}
+                    {index < paths.slice(1).length - 1 && <BreadcrumbSeparator className="text-slate-600" />}
                   </div>
                 ))}
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
-        <div className="p-4 md:p-8">{children}</div>
+        <div className="pt-6 md:pt-8 px-6 md:px-10 pb-10">{children}</div>
+        <ChatBot role={role} />
       </main>
     </SidebarProvider>
   );

@@ -60,65 +60,72 @@ export default async function PublicJobsPage({
     .orderBy(desc(JobListingTable.postedAt))
 
   return (
-    <div className="container mx-auto py-10 space-y-8 px-4">
-      <div className="flex flex-col gap-4 text-center">
-        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
-          Discover Your Next Opportunity
+    <div className="container mx-auto py-16 space-y-12 px-6">
+      <div className="flex flex-col gap-6 text-center max-w-2xl mx-auto">
+        <h1 className="text-5xl md:text-6xl font-black tracking-tight text-white leading-tight">
+          Discover Your <span className="text-gradient-purple">Next Role</span>
         </h1>
-        <p className="text-xl text-muted-foreground max-w-[700px] mx-auto text-balance">
-          Browse the latest roles in AI and technology from top companies.
+        <p className="text-lg md:text-xl text-slate-400 font-medium">
+          Browse the most elite AI and technology positions from globally recognized companies.
         </p>
       </div>
 
-      <JobFilters />
+      <div className="max-w-4xl mx-auto w-full">
+         <JobFilters />
+      </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-6 max-w-4xl mx-auto w-full">
         {jobs.map((job) => (
-          <Card key={job.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row justify-between gap-4">
-                <div className="flex gap-4">
-                  <div className="size-12 rounded-lg border bg-muted flex items-center justify-center overflow-hidden shrink-0">
+          <Link key={job.id} href={`/jobs/${job.id}`} className="group block">
+            <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-800/40 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-slate-800 hover:shadow-2xl hover:shadow-primary/10">
+              <div className="flex flex-col md:flex-row justify-between gap-8 relative z-10">
+                <div className="flex gap-6">
+                  <div className="size-16 rounded-2xl border border-white/10 bg-slate-900 flex items-center justify-center overflow-hidden shrink-0 shadow-inner group-hover:scale-110 transition-transform duration-500">
                     {job.organizationImageUrl ? (
-                       <img src={job.organizationImageUrl} alt={job.organizationName} className="object-cover" />
+                       <img src={job.organizationImageUrl} alt={job.organizationName} className="object-cover w-full h-full" />
                     ) : (
-                       <Briefcase className="size-6 text-muted-foreground" />
+                       <Briefcase className="size-8 text-slate-600" />
                     )}
                   </div>
-                  <div className="space-y-1">
-                    <h3 className="font-bold text-xl">{job.title}</h3>
-                    <p className="text-muted-foreground font-medium">{job.organizationName}</p>
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground pt-2">
-                       <span className="flex items-center gap-1">
-                         <MapPin className="size-4" />
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                       <span className="text-cyan-400 font-black text-xs uppercase tracking-[0.2em]">{job.organizationName}</span>
+                    </div>
+                    <h3 className="font-black text-2xl text-white group-hover:text-primary transition-colors">{job.title}</h3>
+                    <div className="flex flex-wrap gap-4 text-xs font-bold text-slate-400 pt-2">
+                       <span className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5">
+                         <MapPin className="size-3.5 text-primary" />
                          {job.locationRequirement}
                        </span>
-                       <span className="flex items-center gap-1">
-                         <Clock className="size-4" />
+                       <span className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 capitalize">
+                         <Clock className="size-3.5 text-teal-500" />
                          {job.type}
                        </span>
                        {job.wage && (
-                         <span className="flex items-center gap-1">
-                           <DollarSign className="size-4" />
+                         <span className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5">
+                           <DollarSign className="size-3.5 text-emerald-500" />
                            {job.wage.toLocaleString()} / {job.wageInterval}
                          </span>
                        )}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center md:justify-end">
-                   <Button asChild>
-                     <Link href={`/jobs/${job.id}`}>View Details</Link>
+                <div className="flex items-center">
+                   <Button variant="outline" className="w-full md:w-auto font-black px-8">
+                     View Role
                    </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </Link>
         ))}
 
         {jobs.length === 0 && (
-          <div className="text-center py-20 border rounded-xl bg-muted/20">
-             <p className="text-muted-foreground italic">No jobs posted yet. Check back soon!</p>
+          <div className="text-center py-24 border-2 border-dashed border-white/5 rounded-3xl bg-slate-800/20">
+             <div className="size-20 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-6">
+                <Briefcase className="size-10 text-slate-600" />
+             </div>
+             <p className="text-slate-400 font-bold text-xl italic max-w-xs mx-auto">No job opportunities found matching your criteria.</p>
           </div>
         )}
       </div>
