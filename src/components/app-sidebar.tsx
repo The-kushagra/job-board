@@ -103,14 +103,14 @@ export function AppSidebar({ role }: { role: 'recruiter' | 'candidate' }) {
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader>
-        <div className="flex items-center gap-3 px-4 py-4">
-          <div className="flex aspect-square size-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/20">
+        <Link href="/" className="flex items-center gap-3 px-4 py-4 group/logo active:scale-95 transition-transform">
+          <div className="flex aspect-square size-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/20 group-hover/logo:scale-110 transition-transform">
             <BriefcaseBusiness className="size-5" />
           </div>
           <span className="font-bold text-xl tracking-tight text-gradient-purple group-data-[collapsible=icon]:hidden">
             NextHire
           </span>
-        </div>
+        </Link>
       </SidebarHeader>
       <SidebarContent className="px-2">
         <SidebarGroup>
