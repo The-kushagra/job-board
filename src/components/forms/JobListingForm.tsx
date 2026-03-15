@@ -40,7 +40,7 @@ export function JobListingForm({ organizationId }: { organizationId: string }) {
   const [error, setError] = useState<string | null>(null)
   
   const form = useForm<JobListingFormValues>({
-    resolver: zodResolver(jobListingSchema),
+    resolver: zodResolver(jobListingSchema) as any,
     defaultValues: {
       title: "",
       description: "",
@@ -54,7 +54,7 @@ export function JobListingForm({ organizationId }: { organizationId: string }) {
   })
 
   async function onSubmit(values: JobListingFormValues) {
-    const result = await createJobListing(values as any)
+    const result = await createJobListing(values)
     if (result?.error) {
       setError(result.error)
     }
@@ -67,7 +67,7 @@ export function JobListingForm({ organizationId }: { organizationId: string }) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-6">
             <FormField
               control={form.control as any}
               name="title"

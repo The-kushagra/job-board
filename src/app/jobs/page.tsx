@@ -30,7 +30,7 @@ export default async function PublicJobsPage({
       or(
         ilike(JobListingTable.title, `%${search}%`),
         ilike(OrganizationTable.name, `%${search}%`)
-      )
+      )!
     )
   }
 
