@@ -1,6 +1,6 @@
-import { auth } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import { db } from "@/drizzle/db"
-import { UserResumeTable } from "@/drizzle/schema"
+import { UserResumeTable, UserTable } from "@/drizzle/schema"
 import { eq, desc } from "drizzle-orm"
 import { upsertResumeEmbedding } from "@/lib/vectorSync"
 
@@ -12,13 +12,31 @@ async function extractTextFromPDF(fileBytes: ArrayBuffer): Promise<string> {
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth()
+  const user = await currentUser()
 
-  if (!userId) {
+  if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  const userId = user.id
+
   try {
+    // Ensure the user exists in the DB before resume insert (safeguard against webhook delay)
+    await db.insert(UserTable).values({
+      id: user.id,
+      name: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'User',
+      email: user.emailAddresses[0]?.emailAddress ?? '',
+      imageUrl: user.imageUrl ?? '',
+    }).onConflictDoUpdate({
+      target: UserTable.id,
+      set: {
+        name: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'User',
+        email: user.emailAddresses[0]?.emailAddress ?? '',
+        imageUrl: user.imageUrl ?? '',
+        updatedAt: new Date(),
+      }
+    })
+
     const formData = await req.formData()
     const file = formData.get("resume") as File
 
