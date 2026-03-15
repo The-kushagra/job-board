@@ -1,39 +1,15 @@
-import { desc, eq, and } from "drizzle-orm"
-import { notFound, redirect } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Plus, MoreHorizontal, Settings } from "lucide-react"
-import { auth } from "@clerk/nextjs/server"
-import { OrganizationUserSettingsTable } from "@/drizzle/schema"
 import { db } from "@/drizzle/db"
-import { OrganizationTable, JobListingTable } from "@/drizzle/schema"
+import { OrganizationTable } from "@/drizzle/schema"
+import { eq } from "drizzle-orm"
+import { notFound } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { Building2, Settings, BriefcaseBusiness } from "lucide-react"
 
-export default async function OrganizationPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function OrganizationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { userId } = await auth()
-
-  if (!userId) {
-    notFound()
-  }
-
-  // Check if user is an admin of this organization
-  const userSettings = await db.query.OrganizationUserSettingsTable.findFirst({
-    where: and(
-      eq(OrganizationUserSettingsTable.userId, userId),
-      eq(OrganizationUserSettingsTable.organizationId, id),
-      eq(OrganizationUserSettingsTable.role, "admin")
-    )
-  })
-
-  // If not an admin, they shouldn't see this management dashboard
-  if (!userSettings) {
-    return redirect("/dashboard")
-  }
-
+  
   const organization = await db.query.OrganizationTable.findFirst({
     where: eq(OrganizationTable.id, id),
   })
@@ -42,70 +18,55 @@ export default async function OrganizationPage({
     notFound()
   }
 
-  const jobs = await db
-    .select()
-    .from(JobListingTable)
-    .where(eq(JobListingTable.organizationId, id))
-    .orderBy(desc(JobListingTable.postedAt))
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">{organization.name} Dashboard</h1>
-        <div className="flex gap-2">
-           <Button variant="outline" size="sm" asChild>
-             <Link href={`/organizations/${id}/settings`}>
-               <Settings className="mr-2 size-4" /> Settings
-             </Link>
-           </Button>
-           <Button size="sm" asChild>
-             <Link href={`/organizations/${id}/jobs/new`}>
-               <Plus className="mr-2 size-4" /> Post a Job
-             </Link>
-           </Button>
+    <div className="container mx-auto py-10 space-y-8 px-6">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="flex items-center gap-6">
+          <div className="size-20 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-xl overflow-hidden border border-white/10">
+            {organization.imageUrl ? (
+              <img src={organization.imageUrl} alt={organization.name} className="object-cover w-full h-full" />
+            ) : (
+              <Building2 className="size-10" />
+            )}
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-4xl font-black text-white tracking-tight">{organization.name}</h1>
+            <p className="text-slate-400 font-medium italic">Organization Dashboard</p>
+          </div>
         </div>
-      </div>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-xl border bg-card text-card-foreground shadow">
-          <div className="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
-            <h3 className="tracking-tight text-sm font-medium">Active Jobs</h3>
-          </div>
-          <div className="p-6 pt-0">
-            <div className="text-2xl font-bold">{jobs.length}</div>
-          </div>
+        
+        <div className="flex items-center gap-3">
+          <Button asChild variant="outline" className="gap-2 font-bold bg-white/5 border-white/10 hover:bg-white/10">
+            <Link href={`/organizations/${id}/settings`}>
+              <Settings className="size-4 text-slate-400" />
+              Settings
+            </Link>
+          </Button>
+          <Button asChild className="gap-2 font-black shadow-lg shadow-primary/20">
+            <Link href={`/organizations/${id}/jobs`}>
+              <BriefcaseBusiness className="size-4" />
+              Manage Jobs
+            </Link>
+          </Button>
         </div>
       </div>
 
-      <div className="rounded-xl border shadow">
-        <div className="p-6 flex flex-col gap-4">
-          <h3 className="text-lg font-bold">Manage Job Listings</h3>
-          <div className="divide-y">
-             {jobs.map((job) => (
-                <div key={job.id} className="py-4 flex items-center justify-between">
-                   <div>
-                      <p className="font-bold">{job.title}</p>
-                      <p className="text-sm text-muted-foreground capitalize">{job.type} • {job.locationRequirement}</p>
-                   </div>
-                   <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" asChild>
-                         <Link href={`/organizations/${id}/jobs/${job.id}/applicants`}>
-                            View Applicants
-                         </Link>
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="size-4" />
-                      </Button>
-                   </div>
-                </div>
-             ))}
-             {jobs.length === 0 && (
-                <div className="py-10 text-center text-muted-foreground italic">
-                   No jobs posted yet.
-                </div>
-             )}
-          </div>
-        </div>
+      <div className="grid md:grid-cols-3 gap-8 pt-8">
+        <Card className="bg-slate-800/40 border-white/5 shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-400">Company Profile</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+             <div className="space-y-1">
+                <p className="text-xs font-bold text-primary uppercase">Official Name</p>
+                <p className="text-white font-medium">{organization.name}</p>
+             </div>
+             <div className="space-y-1">
+                <p className="text-xs font-bold text-primary uppercase">Organization ID</p>
+                <p className="text-slate-400 font-mono text-xs truncate">{organization.id}</p>
+             </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

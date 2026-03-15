@@ -2,34 +2,36 @@
 
 import { Button } from "@/components/ui/button"
 import { deleteOrganization } from "@/server/actions/organizations"
+import { Trash2, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
-  AlertDialogTrigger 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Loader2, Trash2 } from "lucide-react"
 
-export function DeleteOrganizationButton({ organizationId, organizationName }: { organizationId: string, organizationName: string }) {
+export function DeleteOrganizationButton({ organizationId }: { organizationId: string }) {
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleDelete = async () => {
+  async function handleDelete() {
     setIsDeleting(true)
     try {
       const result = await deleteOrganization(organizationId)
-      if (result && "error" in result) {
+      if (result?.error) {
         toast.error(result.error)
-        setIsDeleting(false)
+      } else {
+        toast.success("Organization deleted successfully")
       }
     } catch (error) {
-      toast.error("Failed to delete organization")
+      toast.error("An unexpected error occurred")
+    } finally {
       setIsDeleting(false)
     }
   }
@@ -37,35 +39,36 @@ export function DeleteOrganizationButton({ organizationId, organizationName }: {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="gap-2">
-            <Trash2 className="size-4" />
-            Delete Organization
+        <Button variant="destructive" className="gap-2 font-black shadow-lg shadow-destructive/20">
+          <Trash2 className="size-4" />
+          Delete Organization
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-slate-900 border-white/10">
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the <strong>{organizationName}</strong> organization and remove all associated data including job listings and applications.
+          <AlertDialogTitle className="text-white font-black text-2xl">Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription className="text-slate-400 font-medium">
+            This action cannot be undone. This will permanently delete your organization,
+            including all active job listings and applicant data.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction 
+        <AlertDialogFooter className="mt-6 border-t border-white/5 pt-6">
+          <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10 font-bold">Cancel</AlertDialogCancel>
+          <AlertDialogAction
             onClick={(e) => {
-                e.preventDefault()
-                handleDelete()
-            }} 
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+               e.preventDefault()
+               handleDelete()
+            }}
+            className="bg-destructive hover:bg-destructive/90 text-white font-black"
             disabled={isDeleting}
           >
             {isDeleting ? (
-                <>
-                    <Loader2 className="size-4 animate-spin mr-2" />
-                    Deleting...
-                </>
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
             ) : (
-                "Permanently Delete"
+              "Confirm Permanent Deletion"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

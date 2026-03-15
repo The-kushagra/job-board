@@ -4,7 +4,7 @@ import { db } from "@/drizzle/db"
 import { OrganizationTable, OrganizationUserSettingsTable, UserTable } from "@/drizzle/schema"
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { eq } from "drizzle-orm"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, unstable_noStore as noStore } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 
@@ -121,4 +121,21 @@ export async function deleteOrganization(organizationId: string) {
   }
 
   redirect("/dashboard")
+}
+export async function getUserOrganizations() {
+  noStore()
+  const { userId } = await auth()
+  if (!userId) return []
+
+  return db
+    .select({
+      id: OrganizationTable.id,
+      name: OrganizationTable.name,
+    })
+    .from(OrganizationTable)
+    .innerJoin(
+      OrganizationUserSettingsTable,
+      eq(OrganizationTable.id, OrganizationUserSettingsTable.organizationId)
+    )
+    .where(eq(OrganizationUserSettingsTable.userId, userId))
 }

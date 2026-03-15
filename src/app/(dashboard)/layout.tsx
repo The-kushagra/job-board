@@ -13,6 +13,7 @@ import { headers } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { getUserRole } from "@/lib/getUserRole";
 import { ChatBot } from "@/components/ChatBot";
+import { getUserOrganizations } from "@/server/actions/organizations";
 
 export default async function DashboardLayout({
   children,
@@ -25,12 +26,12 @@ export default async function DashboardLayout({
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") || "";
   
-  // Basic breadcrumb generation logic
+  const organizations = await getUserOrganizations();
   const paths = pathname.split("/").filter(Boolean);
 
   return (
     <SidebarProvider>
-      <AppSidebar role={role} />
+      <AppSidebar role={role} initialOrganizations={organizations} />
       <main className="flex-1 overflow-auto min-h-screen">
         <header className="flex h-16 shrink-0 items-center gap-2 sticky top-0 z-30 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 px-4">
           <div className="flex items-center gap-2">

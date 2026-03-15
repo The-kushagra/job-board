@@ -30,9 +30,15 @@ import { cn } from "@/lib/utils";
 
 type Organization = { id: string; name: string };
 
-export function AppSidebar({ role }: { role: 'recruiter' | 'candidate' }) {
+export function AppSidebar({ 
+  role, 
+  initialOrganizations = [] 
+}: { 
+  role: 'recruiter' | 'candidate',
+  initialOrganizations?: Organization[]
+}) {
   const pathname = usePathname();
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>(initialOrganizations);
   
   useEffect(() => {
     async function fetchOrgs() {

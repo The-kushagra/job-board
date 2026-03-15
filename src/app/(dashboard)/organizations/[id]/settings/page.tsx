@@ -1,17 +1,13 @@
 import { db } from "@/drizzle/db"
-import { OrganizationTable, OrganizationUserSettingsTable, UserTable } from "@/drizzle/schema"
+import { OrganizationTable } from "@/drizzle/schema"
 import { eq } from "drizzle-orm"
 import { notFound } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DeleteOrganizationButton } from "@/components/organizations/DeleteOrganizationButton"
 
-export default async function OrganizationSettingsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function OrganizationSettingsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  
   const organization = await db.query.OrganizationTable.findFirst({
     where: eq(OrganizationTable.id, id),
   })
@@ -20,88 +16,47 @@ export default async function OrganizationSettingsPage({
     notFound()
   }
 
-  const members = await db
-    .select({
-      id: UserTable.id,
-      name: UserTable.name,
-      email: UserTable.email,
-      imageUrl: UserTable.imageUrl,
-      role: OrganizationUserSettingsTable.role,
-    })
-    .from(UserTable)
-    .innerJoin(
-      OrganizationUserSettingsTable,
-      eq(UserTable.id, OrganizationUserSettingsTable.userId)
-    )
-    .where(eq(OrganizationUserSettingsTable.organizationId, id))
-
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">Organization Settings</h1>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Details</CardTitle>
-          <CardDescription>Manage your organization's public profile</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Name</p>
-            <p className="text-sm text-muted-foreground">{organization.name}</p>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="container mx-auto py-10 space-y-10 px-6">
+      <div className="space-y-1">
+        <h1 className="text-3xl font-black text-white tracking-tight">Organization Settings</h1>
+        <p className="text-slate-400 font-medium italic">Manage your profile and configuration for {organization.name}</p>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Members</CardTitle>
-          <CardDescription>People with access to this organization</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {members.map((member) => (
-              <div key={member.id} className="flex items-center justify-between space-x-4">
-                <div className="flex items-center space-x-4">
-                  <Avatar>
-                    <AvatarImage src={member.imageUrl} />
-                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium leading-none">{member.name}</p>
-                    <p className="text-sm text-muted-foreground">{member.email}</p>
-                  </div>
-                </div>
-                <div className="text-sm font-medium capitalize text-muted-foreground">
-                  {member.role}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid gap-8">
+        <Card className="bg-slate-800/40 border-white/5 shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-white font-bold">General Information</CardTitle>
+            <CardDescription className="text-slate-400">Basic details about your organization profile.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+             <div className="space-y-1.5">
+                <label className="text-xs font-black text-primary uppercase tracking-widest">Organization Name</label>
+                <p className="text-lg text-white font-medium">{organization.name}</p>
+             </div>
+             <div className="space-y-1.5">
+                <label className="text-xs font-black text-primary uppercase tracking-widest">Unique Identifier</label>
+                <p className="text-slate-400 font-mono text-sm">{organization.id}</p>
+             </div>
+          </CardContent>
+        </Card>
 
-      <Card className="border-destructive/20 shadow-sm">
-        <CardHeader className="bg-destructive/5">
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          <CardDescription>
-            Irreversible actions for this organization. Please proceed with extreme caution.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <p className="text-sm font-semibold">Delete this organization</p>
-              <p className="text-sm text-muted-foreground">
-                Once deleted, all data including jobs and applications will be gone forever.
-              </p>
-            </div>
-            <DeleteOrganizationButton 
-                organizationId={organization.id} 
-                organizationName={organization.name} 
-            />
-          </div>
-        </CardContent>
-      </Card>
+        <Card className="border-destructive/20 bg-destructive/5 shadow-xl overflow-hidden">
+          <CardHeader className="bg-destructive/10 border-b border-destructive/20">
+            <CardTitle className="text-destructive font-black">Danger Zone</CardTitle>
+            <CardDescription className="text-destructive/70 font-medium">Irreversible actions for your organization.</CardDescription>
+          </CardHeader>
+          <CardContent className="py-6">
+             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="space-y-1">
+                   <p className="text-white font-bold">Delete Organization</p>
+                   <p className="text-slate-500 text-sm">Once deleted, all jobs, applications, and data will be permanently removed.</p>
+                </div>
+                <DeleteOrganizationButton organizationId={id} />
+             </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
