@@ -1,72 +1,35 @@
 "use client"
 
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { createOrganization } from "@/server/actions/organizations"
-import { useState } from "react"
-
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-})
+import { CreateOrganization } from "@clerk/nextjs"
 
 export default function NewOrganizationPage() {
-  const [error, setError] = useState<string | null>(null)
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-    },
-  })
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const result = await createOrganization(values)
-    if (result?.error) {
-      setError(result.error)
-    }
-  }
-
   return (
-    <div className="max-w-md mx-auto mt-10">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Create Organization</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Organization Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Acme Inc." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Creating..." : "Create Organization"}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+    <div className="flex flex-col items-center justify-center min-h-[80vh] py-12 px-4">
+      <div className="mb-8 text-center space-y-2">
+        <h1 className="text-3xl font-black text-white tracking-tight">Create Your Organization</h1>
+        <p className="text-slate-400 font-medium italic">Start hiring top talent with AI-powered ranking.</p>
+      </div>
+      
+      <div className="w-full flex justify-center">
+        <CreateOrganization 
+          routing="hash"
+          afterCreateOrganizationUrl="/dashboard"
+          appearance={{
+            elements: {
+              rootBox: "mx-auto shadow-2xl rounded-2xl overflow-hidden border border-white/5",
+              card: "bg-slate-900 border-none shadow-none",
+              headerTitle: "text-white",
+              headerSubtitle: "text-slate-400",
+              formButtonPrimary: "bg-primary hover:bg-primary/90 text-white font-bold",
+              organizationSwitcherTrigger: "text-white",
+              organizationPreviewTextContainer: "text-white",
+              organizationPreviewSecondaryText: "text-slate-400",
+              formLabel: "text-slate-300 font-bold",
+              formInput: "bg-slate-800 border-white/10 text-white focus:border-primary",
+            }
+          }}
+        />
+      </div>
     </div>
   )
 }
